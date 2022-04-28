@@ -31,7 +31,7 @@ jobs:
       # uses: pkg-src/github-action-git-bash@v1.1
       run: |
           echo 'Setting domain IP'
-          sudo echo "${PUBLIC_IP} fortify.cyberxdemo.com" | sudo tee -a /etc/hosts
+          sudo echo "52.71.233.204 fortify.cyberxdemo.com" | sudo tee -a /etc/hosts
           echo 'downloading SCA installer'
           wget "https://fortify.cyberxdemo.com:8443/ssc/downloads/Fortify_SCA_and_Apps_21.2.2_linux_x64.run"
           wget "https://fortify.cyberxdemo.com:8443/ssc/downloads/fortify.license"
@@ -49,13 +49,8 @@ jobs:
           sourceanalyzer -b github-java-build -clean
           sourceanalyzer -b github-java-build -source 1.8 -cp "./**/*.jar" "./**/*.java" "./**/*.js" "./**/*.jsp" "./**/*.html" "./**/*.properties" "./**/*.xml"
           sourceanalyzer -b github-java-build -scan -f github-sast-report.fpr
-          fortifyclient -url https://fortify.cyberxdemo.com:8443/ssc -authtoken ${AUTH_TOKEN} -application ${APPLICATION_NAME} -applicationVersion ${APPLICATION_VERSION} uploadFPR -file github-sast-report.fpr
-      env:
-        AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
-        APPLICATION_NAME: ${{ secrets.APPLICATION_NAME }}
-        APPLICATION_VERSION: ${{ secrets.APPLICATION_VERSION }}
-        PUBLIC_IP: ${{ secrets.PUBLIC_IP }}
-      
+          fortifyclient -url https://fortify.cyberxdemo.com:8443/ssc -authtoken 516147e5-15ee-4f01-a97a-00ab0b0a589d -application "simplisticrabbitmq" -applicationVersion "11.0" uploadFPR -file github-sast-report.fpr
+
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.2.4
       with:
@@ -74,7 +69,7 @@ jobs:
       #  # Or use ssc_version_id: 1234
       run: |
           echo 'Setting domain IP'
-          sudo echo "${PUBLIC_IP} fortify.cyberxdemo.com" | sudo tee -a /etc/hosts
+          sudo echo "52.71.233.204 fortify.cyberxdemo.com" | sudo tee -a /etc/hosts
           wget -nv https://github.com/fortify/FortifyVulnerabilityExporter/releases/download/v1.5.2/FortifyVulnerabilityExporter.zip
           mkdir -p $HOME/Fortify
           unzip FortifyVulnerabilityExporter.zip -d "$HOME/Fortify/"
@@ -83,8 +78,7 @@ jobs:
           echo $PATH
           FORTIFY_BIN_JAR=$HOME/Fortify/FortifyVulnerabilityExporter.jar
           java -jar $FORTIFY_BIN_JAR SSCToGitHub --ssc.baseUrl=https://fortify.cyberxdemo.com:8443/ssc --ssc.user=admin --ssc.password=sscadmin@123 --ssc.version.name=<ApplicationName>:<ApplicationVersion> --csv.fields.severity='$[vuln.severity]' --csv.fields.friority='$[vuln.friority]' --csv.output.header=true "--csv.filter.expressions=vuln.friority matches 'Critical|High'"
-      env:
-        PUBLIC_IP: ${{ secrets.PUBLIC_IP }}
+
     # Uploaded the generated file containing Fortify vulnerabilities to GitHub.
     - uses: github/codeql-action/upload-sarif@v1
       with:
